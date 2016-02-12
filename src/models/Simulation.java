@@ -72,22 +72,33 @@ public class Simulation {
         int simulationTime = 0;
         while ( simulationTime <= deadline ) {
             final Drone idle = drones.poll();
-            int busyDuration = 0; // flight and load/ delivery time
+            int busyDuration; // flight and load/ delivery time
 
-            final boolean sth = true;
-            if ( idle.shouldDeliver() ) {
-                final Warehouse nearest = idle.getWarehouse();
-                final Order order = nearest.popNextOrder();
+            if ( idle.shouldDeliver() ) { // drone has an order and should fly to the order's destination
+                final Order order = idle.getOrder();
 
-                busyDuration = idle.distance(nearest) + order.size();
+                busyDuration = idle.distance(order) + order.size();
 
                 for ( Map.Entry<Product, Integer> item : order ) {
-                    System.out.println(String.format("%d D %d %d %d", idle.getId(), order.getId(), item.getKey().getId(), item.getValue()));
+                    System.out.println(String.format("%d D %d %d %d",
+                            idle.getId(), order.getId(), item.getKey().getId(), item.getValue()));
                 }
 
-                idle.setOrder(order);
-            } else {
+                idle.setLocation(order);
+                idle.setOrder(null);
+            } else { // drone is at a delivery destination, find next warehouse and load products
+                final Warehouse warehouse = findNearestWarehouseWithOrder(idle);
+                final Order order = warehouse.popNextOrder();
 
+                busyDuration = idle.distance(order) + order.size();
+
+                for ( Map.Entry<Product, Integer> item : order ) {
+                    System.out.println(String.format("%d L %d %d %d",
+                            idle.getId(), warehouse.getId(), item.getKey().getId(), item.getValue()));
+                }
+
+                idle.setLocation(warehouse);
+                idle.setOrder(order);
             }
 
             simulationTime = idle.getIdleTime();

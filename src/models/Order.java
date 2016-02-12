@@ -48,6 +48,7 @@ public class Order implements Location, Iterable<Map.Entry<Product, Integer>> {
                 }
             }
         }
+        subOrders.add(partial);
 
         return subOrders;
     }

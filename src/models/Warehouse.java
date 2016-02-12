@@ -20,15 +20,16 @@ public class Warehouse implements Location {
         this.orders = new LinkedList<>();
     }
 
-    public void addProduct(Product product, int i) {
-        products.merge(product, i, (o, v) -> o + v);
+    public void addProduct(Product product, int amount) {
+        products.merge(product, amount, (o, v) -> o + v);
     }
 
     public boolean hasAllProducts(Order order) {
         for (Map.Entry<Product, Integer> item : order) {
-            final Integer availableCount = products.get(item.getKey());
-            final Integer necessaryCount = item.getValue();
-            if ( availableCount == null || necessaryCount > availableCount ) {
+            final int stock = products.get(item.getKey());
+            final int demand = item.getValue();
+
+            if ( demand > stock ) {
                 return false;
             }
         }
@@ -60,5 +61,9 @@ public class Warehouse implements Location {
     @Override
     public int getCol() {
         return col;
+    }
+
+    public int getId() {
+        return id;
     }
 }

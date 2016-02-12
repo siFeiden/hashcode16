@@ -6,7 +6,6 @@ public class Drone implements Location {
     private int col;
 
     private int idleTime;
-    private Warehouse warehouse;
     private Order order;
 
 
@@ -15,7 +14,6 @@ public class Drone implements Location {
         this.col = initialWarehouse.getCol();
         this.id = id;
         this.idleTime = 0;
-        this.warehouse = initialWarehouse;
         this.order = null;
     }
 
@@ -29,9 +27,9 @@ public class Drone implements Location {
         return col;
     }
 
-    public void setLocation(int row, int col) {
-        this.row = row;
-        this.col = col;
+    public void setLocation(Location location) {
+        this.row = location.getRow();
+        this.col = location.getCol();
     }
 
     public int getId() {
@@ -46,25 +44,15 @@ public class Drone implements Location {
         this.idleTime += delay;
     }
 
-    public Warehouse getWarehouse() {
-        return warehouse;
-    }
-
-    public void setWarehouse(Warehouse warehouse) {
-        this.warehouse = warehouse;
-        this.order = null;
-    }
-
     public Order getOrder() {
         return order;
     }
 
     public void setOrder(Order order) {
         this.order = order;
-        this.warehouse = null;
     }
 
     public boolean shouldDeliver() {
-        return this.warehouse != null;
+        return this.order != null;
     }
 }
