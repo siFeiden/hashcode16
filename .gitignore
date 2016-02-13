@@ -1,7 +1,8 @@
-# IntelliJ
+# Misc
 .idea/
 *.iml
 out/
+*.log
 
 # Java
 *.class

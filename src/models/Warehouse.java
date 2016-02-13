@@ -66,4 +66,23 @@ public class Warehouse implements Location {
     public int getId() {
         return id;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if ( this == o ) {
+            return true;
+        }
+        if ( o == null || getClass() != o.getClass() ) {
+            return false;
+        }
+
+        Warehouse warehouse = (Warehouse) o;
+        return id == warehouse.id;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
 }

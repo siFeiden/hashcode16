@@ -1,7 +1,11 @@
 package models;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class Drone implements Location {
-    final private int id;
+    private final int id;
     private int row;
     private int col;
 
@@ -27,7 +31,7 @@ public class Drone implements Location {
         return col;
     }
 
-    public void setLocation(Location location) {
+    private void setLocation(Location location) {
         this.row = location.getRow();
         this.col = location.getCol();
     }
@@ -40,19 +44,48 @@ public class Drone implements Location {
         return idleTime;
     }
 
-    public void pushIdleTime(int delay) {
+    private void pushIdleTime(int delay) {
         this.idleTime += delay;
     }
 
-    public Order getOrder() {
-        return order;
-    }
-
-    public void setOrder(Order order) {
-        this.order = order;
-    }
-
-    public boolean shouldDeliver() {
+    public boolean hasOrder() {
         return this.order != null;
+    }
+
+    public List<Command> deliver() {
+        if ( order == null ) {
+            return new ArrayList<>();
+        }
+
+        final int duration = this.distance(order) + order.size();
+        this.pushIdleTime(duration);
+
+        final ArrayList<Command> commands = new ArrayList<>();
+        for ( Map.Entry<Product, Integer> item : order ) {
+            commands.add(CommandFactory.deliver(
+                    getId(), order.getId(), item.getKey().getId(), item.getValue()));
+        }
+
+        setLocation(order);
+        order = null;
+
+        return commands;
+    }
+
+    public List<Command> flyToWarehouse(Warehouse warehouse) {
+        this.order = warehouse.popNextOrder();
+
+        final int duration = this.distance(order) + order.size();
+        this.pushIdleTime(duration);
+
+        final ArrayList<Command> commands = new ArrayList<>();
+        for ( Map.Entry<Product, Integer> item : order ) {
+            commands.add(CommandFactory.load(
+                    getId(), warehouse.getId(), item.getKey().getId(), item.getValue()));
+        }
+
+        setLocation(order);
+
+        return commands;
     }
 }

@@ -1,7 +1,11 @@
 package models;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.PriorityQueue;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class Simulation {
     private final int rows;
@@ -25,6 +29,11 @@ public class Simulation {
         this.orders = orders;
     }
 
+    public List<Command> simulate() {
+        dispatchOrders();
+        return sendDrones();
+    }
+
 
     public void dispatchOrders() {
         List<Order> partialOrders = new ArrayList<>();
@@ -42,6 +51,50 @@ public class Simulation {
         }
     }
 
+    public List<Command> sendDrones() {
+        final Comparator<Drone> sortByIdleTime = Comparator.comparingInt(Drone::getIdleTime);
+        final PriorityQueue<Drone> drones = new PriorityQueue<>(sortByIdleTime);
+
+        final Warehouse warehouse0 = warehouses[0];
+        for ( int i = 0; i < dronesCount; i++ ) {
+            final Drone drone = new Drone(warehouse0, i);
+            drones.add(drone);
+        }
+
+        final List<Command> commands = new ArrayList<>();
+        int simulationTime = 0;
+
+        while ( simulationTime <= deadline ) {
+            final Drone idle = drones.poll();
+
+            simulationTime = idle.getIdleTime();
+            final List<Command> actionCmds;
+
+            if ( idle.hasOrder() ) { // drone has an order and should fly to the order's destination
+                actionCmds = idle.deliver();
+            } else { // drone is at a delivery destination, find next warehouse and load products
+                final Warehouse warehouse = findNearestWarehouseWithOrder(idle);
+                if ( warehouse == null ) {
+                    break;
+                }
+
+                actionCmds = idle.flyToWarehouse(warehouse);
+            }
+
+            commands.addAll(actionCmds);
+            drones.add(idle);
+        }
+
+        final List<Command> remainingCommands = drones.stream()
+                .map(Drone::deliver)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+
+        commands.addAll(remainingCommands);
+
+        return commands;
+    }
+
     private Warehouse findNearestCapableWarehouse(Order order) {
         /* int nearestDistance = Integer.MAX_VALUE;
         Warehouse nearestWarehouse = null;
@@ -57,54 +110,6 @@ public class Simulation {
         return nearestWarehouse; */
 
         return findNearestWarehouseWithPredicate(order, w -> w.hasAllProducts(order));
-    }
-
-    public void sendDrones() {
-        Comparator<Drone> sortByIdleTime = Comparator.comparingInt(Drone::getIdleTime);
-        PriorityQueue<Drone> drones = new PriorityQueue<>(sortByIdleTime);
-
-        Warehouse warehouse0 = warehouses[0];
-        for ( int i = 0; i < dronesCount; i++ ) {
-            final Drone drone = new Drone(warehouse0, i);
-            drones.add(drone);
-        }
-
-        int simulationTime = 0;
-        while ( simulationTime <= deadline ) {
-            final Drone idle = drones.poll();
-            int busyDuration; // flight and load/ delivery time
-
-            if ( idle.shouldDeliver() ) { // drone has an order and should fly to the order's destination
-                final Order order = idle.getOrder();
-
-                busyDuration = idle.distance(order) + order.size();
-
-                for ( Map.Entry<Product, Integer> item : order ) {
-                    System.out.println(String.format("%d D %d %d %d",
-                            idle.getId(), order.getId(), item.getKey().getId(), item.getValue()));
-                }
-
-                idle.setLocation(order);
-                idle.setOrder(null);
-            } else { // drone is at a delivery destination, find next warehouse and load products
-                final Warehouse warehouse = findNearestWarehouseWithOrder(idle);
-                final Order order = warehouse.popNextOrder();
-
-                busyDuration = idle.distance(order) + order.size();
-
-                for ( Map.Entry<Product, Integer> item : order ) {
-                    System.out.println(String.format("%d L %d %d %d",
-                            idle.getId(), warehouse.getId(), item.getKey().getId(), item.getValue()));
-                }
-
-                idle.setLocation(warehouse);
-                idle.setOrder(order);
-            }
-
-            simulationTime = idle.getIdleTime();
-            idle.pushIdleTime(busyDuration);
-            drones.add(idle);
-        }
     }
 
     private Warehouse findNearestWarehouseWithOrder(Location location) {
@@ -126,6 +131,19 @@ public class Simulation {
         return nearestWarehouse;
     }
 
+    @Override
+    public String toString() {
+        return "Simulation{" +
+                "rows=" + rows +
+                ", cols=" + cols +
+                ", dronesCount=" + dronesCount +
+                ", deadline=" + deadline +
+                ", maxLoad=" + maxLoad +
+                ", products=" + products.length +
+                ", warehouses=" + warehouses.length +
+                ", orders=" + orders.length +
+                '}';
+    }
 
     public static class Builder {
         private int rows;

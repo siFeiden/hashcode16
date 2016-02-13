@@ -1,4 +1,4 @@
-//import models.Drone;
+import models.Command;
 import models.Simulation;
 
 import java.io.IOException;
@@ -22,9 +22,14 @@ public class Main {
         }
 
         Parser p = new Parser();
-        Simulation sim = p.parse(lines);
-        System.out.println(sim.toString());
+        Simulation simulation = p.parse(lines);
+        System.out.println(simulation.toString());
 
-        //simulate(sim);
+        final List<Command> commands = simulation.simulate();
+
+        System.out.println(commands.size());
+        for ( Command command : commands ) {
+            System.out.println(command.format());
+        }
     }
 }
