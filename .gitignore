@@ -3,6 +3,7 @@
 *.iml
 out/
 *.log
+*.sim
 
 # Java
 *.class
