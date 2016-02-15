@@ -25,9 +25,9 @@ public class Warehouse implements Location {
     }
 
     public boolean hasAllProducts(Order order) {
-        for (Map.Entry<Product, Integer> item : order) {
-            final int stock = products.get(item.getKey());
-            final int demand = item.getValue();
+        for (OrderItem item : order) {
+            final int stock = products.get(item.product);
+            final int demand = item.amount;
 
             if ( demand > stock ) {
                 return false;
@@ -39,9 +39,9 @@ public class Warehouse implements Location {
 
     public void addOrder(Order order) {
         orders.offer(order);
-        for ( Map.Entry<Product, Integer> item : order ) {
-            final Integer demand = item.getValue();
-            products.compute(item.getKey(), (p, stock) -> stock - demand);
+        for ( OrderItem item : order ) {
+            final int demand = item.amount;
+            products.compute(item.product, (p, stock) -> stock - demand);
         }
     }
 

@@ -1,8 +1,9 @@
 package models;
 
 import java.util.*;
+import java.util.function.BiFunction;
 
-public class Order implements Location, Iterable<Map.Entry<Product, Integer>> {
+public class Order implements Location, Iterable<OrderItem> {
     private final int row;
     private final int col;
     private final int id;
@@ -17,34 +18,29 @@ public class Order implements Location, Iterable<Map.Entry<Product, Integer>> {
         this.products = new HashMap<>();
     }
 
+    private Order copyWithoutProducts() {
+        return new Order(row, col, id);
+    }
+
     public void addProduct(Product product) {
         products.merge(product, 1, (o, v) -> o + v);
     }
 
-    public int totalWeight() {
-        int weight = 0;
-        for (Map.Entry<Product, Integer> item : products.entrySet()) {
-            weight += item.getKey().getWeight() * item.getValue();
-        }
-
-        return weight;
-    }
-
-    public List<Order> splitForMaxTotalWeight(int maxWeight) {
+    public List<Order> splitForMaxTotalWeight(int maxWeight) { // TODO optimize order splitting (generate fewer orders)
         final List<Order> subOrders = new ArrayList<>();
 
-        Order partial = new Order(this.row, this.col, this.id);
-        for ( Map.Entry<Product, Integer> item : products.entrySet() ) {
-            final int productWeight = item.getKey().getWeight();
-            int productCount = item.getValue();
+        Order partial = this.copyWithoutProducts();
+        for ( final OrderItem item : this ) {
+            final int productWeight = item.product.getWeight();
+            int productCount = item.amount;
 
             while ( productCount > 0 ) {
                 if ( productWeight <= maxWeight - partial.totalWeight() ) {
-                    partial.addProduct(item.getKey());
+                    partial.addProduct(item.product);
                     productCount--;
                 } else {
                     subOrders.add(partial);
-                    partial = new Order(this.row, this.col, this.id);
+                    partial = this.copyWithoutProducts();
                 }
             }
         }
@@ -71,8 +67,43 @@ public class Order implements Location, Iterable<Map.Entry<Product, Integer>> {
         return products.size();
     }
 
+    public int totalWeight() {
+        int weight = 0;
+        for ( final OrderItem item : this ) {
+            weight += item.product.getWeight() * item.amount;
+        }
+
+        return weight;
+    }
+
     @Override
-    public Iterator<Map.Entry<Product, Integer>> iterator() {
-        return products.entrySet().iterator();
+    public Iterator<OrderItem> iterator() {
+        return new TransformMapIterator<>(
+                products.entrySet().iterator(), OrderItem::new);
+    }
+
+    private static class TransformMapIterator<K, V, T> implements Iterator<T> {
+
+        private final Iterator<Map.Entry<K, V>> iterator;
+        private final BiFunction<K, V, T> transformer;
+
+        private TransformMapIterator(Iterator<Map.Entry<K, V>> iterator, BiFunction<K, V, T> transformer) {
+            Objects.requireNonNull(iterator);
+            Objects.requireNonNull(transformer);
+
+            this.iterator = iterator;
+            this.transformer = transformer;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+
+        @Override
+        public T next() {
+            final Map.Entry<K, V> next = iterator.next();
+            return transformer.apply(next.getKey(), next.getValue());
+        }
     }
 }

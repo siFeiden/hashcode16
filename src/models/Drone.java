@@ -2,7 +2,6 @@ package models;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Drone implements Location {
     private final int id;
@@ -61,9 +60,9 @@ public class Drone implements Location {
         this.pushIdleTime(duration);
 
         final ArrayList<Command> commands = new ArrayList<>();
-        for ( Map.Entry<Product, Integer> item : order ) {
-            commands.add(CommandFactory.deliver(
-                    getId(), order.getId(), item.getKey().getId(), item.getValue()));
+        for ( OrderItem item : order ) {
+            commands.add(Command.deliver(
+                    getId(), order.getId(), item.product.getId(), item.amount));
         }
 
         setLocation(order);
@@ -79,9 +78,9 @@ public class Drone implements Location {
         this.pushIdleTime(duration);
 
         final ArrayList<Command> commands = new ArrayList<>();
-        for ( Map.Entry<Product, Integer> item : order ) {
-            commands.add(CommandFactory.load(
-                    getId(), warehouse.getId(), item.getKey().getId(), item.getValue()));
+        for ( OrderItem item : order ) {
+            commands.add(Command.load(
+                    getId(), warehouse.getId(), item.product.getId(), item.amount));
         }
 
         setLocation(order);
