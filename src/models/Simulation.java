@@ -1,9 +1,6 @@
 package models;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -30,14 +27,14 @@ public class Simulation {
     }
 
     public List<Command> simulate() {
-        dispatchOrders();
+        assignOrdersToWarehouses();
         return sendDrones();
     }
 
 
-    public void dispatchOrders() {
+    private void assignOrdersToWarehouses() {
         List<Order> partialOrders = new ArrayList<>();
-        for (Order order : orders) {
+        for (final Order order : orders) {
             partialOrders.addAll(order.splitForMaxTotalWeight(maxLoad));
         }
 
@@ -51,7 +48,7 @@ public class Simulation {
         }
     }
 
-    public List<Command> sendDrones() {
+    private List<Command> sendDrones() {
         final Comparator<Drone> sortByIdleTime = Comparator.comparingInt(Drone::getIdleTime);
         final PriorityQueue<Drone> drones = new PriorityQueue<>(sortByIdleTime);
 
@@ -146,11 +143,11 @@ public class Simulation {
     }
 
     public static class Builder {
-        private int rows;
-        private int cols;
-        private int dronesCount;
-        private int deadline;
-        private int maxLoad;
+        private final int rows;
+        private final int cols;
+        private final int dronesCount;
+        private final int deadline;
+        private final int maxLoad;
         private Product[] products;
         private Warehouse[] warehouses;
         private Order[] orders;

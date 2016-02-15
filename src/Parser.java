@@ -5,7 +5,7 @@ import models.Warehouse;
 
 import java.util.List;
 
-public class Parser {
+class Parser {
     public Simulation parse (List<String> inputLines) {
         final Simulation.Builder builder = createSimulationWithParams(inputLines.get(0));
 

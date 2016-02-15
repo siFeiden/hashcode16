@@ -1,6 +1,6 @@
 package models;
 
-public interface Location {
+interface Location {
 
     int getRow();
     int getCol();
