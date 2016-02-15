@@ -38,12 +38,13 @@ public class Simulation {
             partialOrders.addAll(order.splitForMaxTotalWeight(maxLoad));
         }
 
-        for (Order order : partialOrders) {
-            Warehouse nearestWarehouse = findNearestCapableWarehouse(order);
-            if ( nearestWarehouse != null ) {
-                nearestWarehouse.addOrder(order);
-            } else {
-                // TODO split further, try again
+        for (final Order order : partialOrders) {
+            final Optional<Warehouse> nearestWarehouse = findNearestCapableWarehouse(order);
+            if ( nearestWarehouse.isPresent() ) {
+                // nearestWarehouse.ifPresent(wh -> wh.addOrder(order));
+                nearestWarehouse.get().addOrder(order);
+            } else { // found no warehouse with sufficient stock for this order
+                // TODO split order and try again
             }
         }
     }
@@ -70,12 +71,12 @@ public class Simulation {
             if ( idle.hasOrder() ) { // drone has an order and should fly to the order's destination
                 actionCmds = idle.deliver();
             } else { // drone is at a delivery destination, find next warehouse and load products
-                final Warehouse warehouse = findNearestWarehouseWithOrder(idle);
-                if ( warehouse == null ) {
+                final Optional<Warehouse> warehouse = findNearestWarehouseWithOrder(idle);
+                if ( warehouse.isPresent() ) {
+                    actionCmds = idle.flyToWarehouse(warehouse.get());
+                } else { // no more orders to be processed, stop simulating
                     break;
                 }
-
-                actionCmds = idle.flyToWarehouse(warehouse);
             }
 
             commands.addAll(actionCmds);
@@ -92,32 +93,19 @@ public class Simulation {
         return commands;
     }
 
-    private Warehouse findNearestCapableWarehouse(Order order) {
-        /* int nearestDistance = Integer.MAX_VALUE;
-        Warehouse nearestWarehouse = null;
-
-        for (Warehouse warehouse : warehouses) { // TODO improve: sort by distance, then check for capability
-            final int currDistance = warehouse.distance(order);
-            if ( currDistance < nearestDistance && warehouse.hasAllProducts(order) ) {
-                nearestDistance = currDistance;
-                nearestWarehouse = warehouse;
-            }
-        }
-
-        return nearestWarehouse; */
-
+    private Optional<Warehouse> findNearestCapableWarehouse(Order order) {
         return findNearestWarehouseWithPredicate(order, w -> w.hasAllProducts(order));
     }
 
-    private Warehouse findNearestWarehouseWithOrder(Location location) {
+    private Optional<Warehouse> findNearestWarehouseWithOrder(Location location) {
         return findNearestWarehouseWithPredicate(location, Warehouse::hasNextOrder);
     }
 
-    private Warehouse findNearestWarehouseWithPredicate(Location location, Predicate<Warehouse> predicate) {
+    private Optional<Warehouse> findNearestWarehouseWithPredicate(Location location, Predicate<Warehouse> predicate) {
         int nearestDistance = Integer.MAX_VALUE;
         Warehouse nearestWarehouse = null;
 
-        for (Warehouse warehouse : warehouses) { // TODO improve: sort by distance, then check for capability
+        for ( final Warehouse warehouse : warehouses ) {
             final int currDistance = warehouse.distance(location);
             if ( currDistance < nearestDistance && predicate.test(warehouse) ) {
                 nearestDistance = currDistance;
@@ -125,7 +113,7 @@ public class Simulation {
             }
         }
 
-        return nearestWarehouse;
+        return Optional.ofNullable(nearestWarehouse);
     }
 
     @Override
