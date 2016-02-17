@@ -33,8 +33,8 @@ public class Simulation {
 
 
     private void assignOrdersToWarehouses() {
-        List<Order> partialOrders = new ArrayList<>();
-        for (final Order order : orders) {
+        final List<Order> partialOrders = new ArrayList<>();
+        for ( final Order order : orders ) {
             partialOrders.addAll(order.splitForMaxTotalWeight(maxLoad));
         }
 

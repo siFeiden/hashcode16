@@ -25,8 +25,8 @@ public class Warehouse implements Location {
     }
 
     public boolean hasAllProducts(Order order) {
-        for (OrderItem item : order) {
-            final int stock = products.get(item.product);
+        for ( final OrderItem item : order ) {
+            final int stock = products.getOrDefault(item.product, 0);
             final int demand = item.amount;
 
             if ( demand > stock ) {
@@ -39,7 +39,7 @@ public class Warehouse implements Location {
 
     public void addOrder(Order order) {
         orders.offer(order);
-        for ( OrderItem item : order ) {
+        for ( final OrderItem item : order ) {
             final int demand = item.amount;
             products.compute(item.product, (p, stock) -> stock - demand);
         }

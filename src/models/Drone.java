@@ -60,7 +60,7 @@ public class Drone implements Location {
         this.pushIdleTime(duration);
 
         final ArrayList<Command> commands = new ArrayList<>();
-        for ( OrderItem item : order ) {
+        for ( final OrderItem item : order ) {
             commands.add(Command.deliver(
                     getId(), order.getId(), item.product.getId(), item.amount));
         }
@@ -78,7 +78,7 @@ public class Drone implements Location {
         this.pushIdleTime(duration);
 
         final ArrayList<Command> commands = new ArrayList<>();
-        for ( OrderItem item : order ) {
+        for ( final OrderItem item : order ) {
             commands.add(Command.load(
                     getId(), warehouse.getId(), item.product.getId(), item.amount));
         }
