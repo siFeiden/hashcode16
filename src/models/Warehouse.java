@@ -37,6 +37,26 @@ public class Warehouse implements Location {
         return true;
     }
 
+    public Order takeStockedProducts(Order order) { // TODO find better name
+        final Order remainingProducts = order.copyWithoutProducts();
+        final Order takenProducts = order.copyWithoutProducts();
+
+        for ( final OrderItem item : order ) {
+            final int stock = products.getOrDefault(item.product, 0);
+            final int demand = item.amount;
+
+            if ( demand < stock ) {
+                takenProducts.addProduct(item.product, demand);
+            } else { // demand >= stock
+                takenProducts.addProduct(item.product, stock);
+                remainingProducts.addProduct(item.product, demand - stock);
+            }
+        }
+
+        this.addOrder(takenProducts);
+        return remainingProducts;
+    }
+
     public void addOrder(Order order) {
         orders.offer(order);
         for ( final OrderItem item : order ) {

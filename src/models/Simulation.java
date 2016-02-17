@@ -38,13 +38,22 @@ public class Simulation {
             partialOrders.addAll(order.splitForMaxTotalWeight(maxLoad));
         }
 
-        for (final Order order : partialOrders) {
-            final Optional<Warehouse> nearestWarehouse = findNearestCapableWarehouse(order);
-            if ( nearestWarehouse.isPresent() ) {
-                // nearestWarehouse.ifPresent(wh -> wh.addOrder(order));
-                nearestWarehouse.get().addOrder(order);
-            } else { // found no warehouse with sufficient stock for this order
-                // TODO split order and try again
+        final IntSummaryStatistics collect = partialOrders.stream()
+                .collect(Collectors.summarizingInt(Order::size));
+        System.out.println(collect);
+
+        final Warehouse[] sortedWareHouses = Arrays.copyOf(this.warehouses, warehouses.length);
+
+        for ( Order order : partialOrders ) {
+            final Comparator<Warehouse> distanceToCurrentOrder = Comparator.comparingInt(order::distance);
+            Arrays.sort(sortedWareHouses, distanceToCurrentOrder);
+
+            for ( final Warehouse warehouse : sortedWareHouses ) {
+                order = warehouse.takeStockedProducts(order);
+
+                if ( order.isEmpty() ) {
+                    break;
+                }
             }
         }
     }

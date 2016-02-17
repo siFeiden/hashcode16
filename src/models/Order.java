@@ -23,7 +23,13 @@ public class Order implements Location, Iterable<OrderItem> {
     }
 
     public void addProduct(Product product) {
-        products.merge(product, 1, (o, v) -> o + v);
+        this.addProduct(product, 1);
+    }
+
+    public void addProduct(Product product, int amount) {
+        if ( amount > 0 ) { // prevent (product, 0) entries
+            products.merge(product, amount, (stock, add) -> stock + add);
+        }
     }
 
     public List<Order> splitForMaxTotalWeight(int maxWeight) { // TODO optimize order splitting (generate fewer orders)
@@ -61,6 +67,10 @@ public class Order implements Location, Iterable<OrderItem> {
 
     public int getId() {
         return id;
+    }
+
+    public boolean isEmpty() {
+        return products.isEmpty();
     }
 
     public int size() {
