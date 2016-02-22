@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.Map;
 
 public class OrderTest {
 
@@ -20,12 +19,12 @@ public class OrderTest {
 
         Assert.assertEquals(2, testOrder.size());
 
-        for ( Map.Entry<Product, Integer> item : testOrder ) {
-            if ( item.getKey().equals(p1) ) {
-                Assert.assertEquals(2, item.getValue().intValue());
+        for ( final OrderItem item : testOrder ) {
+            if ( item.product.equals(p1) ) {
+                Assert.assertEquals(2, item.amount);
             }
-            if ( item.getKey().equals(p2) ) {
-                Assert.assertEquals(1, item.getValue().intValue());
+            if ( item.product.equals(p2) ) {
+                Assert.assertEquals(1, item.amount);
             }
         }
     }
