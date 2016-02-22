@@ -102,10 +102,6 @@ public class Simulation {
         return commands;
     }
 
-    private Optional<Warehouse> findNearestCapableWarehouse(Order order) {
-        return findNearestWarehouseWithPredicate(order, w -> w.hasAllProducts(order));
-    }
-
     private Optional<Warehouse> findNearestWarehouseWithOrder(Location location) {
         return findNearestWarehouseWithPredicate(location, Warehouse::hasNextOrder);
     }

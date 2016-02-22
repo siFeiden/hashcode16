@@ -27,30 +27,37 @@ public class Order implements Location, Iterable<OrderItem> {
     }
 
     public void addProduct(Product product, int amount) {
-        if ( amount > 0 ) { // prevent (product, 0) entries
+        if ( amount > 0 ) { // prevent non positive stock entries
             products.merge(product, amount, (stock, add) -> stock + add);
         }
     }
 
-    public List<Order> splitForMaxTotalWeight(int maxWeight) { // TODO optimize order splitting (generate fewer orders)
+    public List<Order> splitForMaxTotalWeight(int maxWeight) {
+        // this is a bin packing problem, use first fit strategy
+        // best average = 2.39249
+        
         final List<Order> subOrders = new ArrayList<>();
 
-        Order partial = this.copyWithoutProducts();
         for ( final OrderItem item : this ) {
-            final int productWeight = item.product.getWeight();
-            int productCount = item.amount;
+            for ( int i = 0; i < item.amount; i++ ) {
+                final Product distributedProduct = item.product;
+                boolean isDistributed = false;
 
-            while ( productCount > 0 ) {
-                if ( productWeight <= maxWeight - partial.totalWeight() ) {
-                    partial.addProduct(item.product);
-                    productCount--;
-                } else {
-                    subOrders.add(partial);
-                    partial = this.copyWithoutProducts();
+                for ( final Order partial : subOrders ) { // find a partial order where product fits
+                    if ( distributedProduct.getWeight() <= maxWeight - partial.totalWeight() ) {
+                        partial.addProduct(distributedProduct);
+                        isDistributed = true;
+                        break;
+                    }
+                }
+
+                if ( !isDistributed ) { // no such partial order was found, create a new one
+                    final Order newPartial = this.copyWithoutProducts();
+                    newPartial.addProduct(distributedProduct);
+                    subOrders.add(newPartial);
                 }
             }
         }
-        subOrders.add(partial);
 
         return subOrders;
     }
