@@ -15,7 +15,7 @@ public class Simulation {
     private final Order[] orders;
 
     private Simulation(int rows, int cols, int dronesCount, int deadline, int maxLoad,
-                      Product[] products, Warehouse[] warehouses, Order[] orders) {
+                       Product[] products, Warehouse[] warehouses, Order[] orders) {
         this.rows = rows;
         this.cols = cols;
         this.dronesCount = dronesCount;

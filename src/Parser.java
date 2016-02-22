@@ -6,7 +6,7 @@ import models.Warehouse;
 import java.util.List;
 
 class Parser {
-    public Simulation parse (List<String> inputLines) {
+    public Simulation parse(List<String> inputLines) {
         final Simulation.Builder builder = createSimulationWithParams(inputLines.get(0));
 
         final Product[] products = createProducts(inputLines.get(1), inputLines.get(2));
@@ -40,7 +40,7 @@ class Parser {
         final String[] productsWeightSplit = prodWeightLine.split(" ");
         final Product[] products = new Product[productTypesCount];
 
-        for (int i = 0; i < productsWeightSplit.length; i++) {
+        for ( int i = 0; i < productsWeightSplit.length; i++ ) {
             products[i] = new Product(asInt(productsWeightSplit[i]), i);
         }
 
@@ -51,12 +51,12 @@ class Parser {
         final int warehouseCount = asInt(lines.get(0));
         final Warehouse[] warehouses = new Warehouse[warehouseCount];
 
-        for (int i = 0; i < warehouseCount; i++) {
-            final String[] positionSplit = lines.get(2*i + 1).split(" "); // position
+        for ( int i = 0; i < warehouseCount; i++ ) {
+            final String[] positionSplit = lines.get(2 * i + 1).split(" "); // position
             final Warehouse warehouse = new Warehouse(asInt(positionSplit[0]), asInt(positionSplit[1]), i);
 
-            final String[] productCountsSplit = lines.get(2*i + 2).split(" ");
-            for (int j = 0; j < products.length; j++) {
+            final String[] productCountsSplit = lines.get(2 * i + 2).split(" ");
+            for ( int j = 0; j < products.length; j++ ) {
                 warehouse.addProduct(products[j], asInt(productCountsSplit[j]));
             }
 
@@ -70,13 +70,13 @@ class Parser {
         final int orderCount = asInt(lines.get(0));
         final Order[] orders = new Order[orderCount];
 
-        for (int i = 0; i < orderCount; i++) {
-            final String[] destinationSplit = lines.get(3*i + 1).split(" "); // position
+        for ( int i = 0; i < orderCount; i++ ) {
+            final String[] destinationSplit = lines.get(3 * i + 1).split(" "); // position
             final Order order = new Order(asInt(destinationSplit[0]), asInt(destinationSplit[1]), i);
 
-            final int prodCount = asInt(lines.get(3*i + 2));
-            final String[] prodTypesSplit = lines.get(3*i + 3).split(" ");
-            for (int j = 0; j < prodCount; j++) {
+            final int prodCount = asInt(lines.get(3 * i + 2));
+            final String[] prodTypesSplit = lines.get(3 * i + 3).split(" ");
+            for ( int j = 0; j < prodCount; j++ ) {
                 final int productType = asInt(prodTypesSplit[j]);
                 order.addProduct(products[productType]);
             }

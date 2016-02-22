@@ -3,6 +3,7 @@ package models;
 interface Location {
 
     int getRow();
+
     int getCol();
 
     default int distance(Location other) {

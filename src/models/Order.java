@@ -34,8 +34,7 @@ public class Order implements Location, Iterable<OrderItem> {
 
     public List<Order> splitForMaxTotalWeight(int maxWeight) {
         // this is a bin packing problem, use first fit strategy
-        // best average = 2.39249
-        
+
         final List<Order> subOrders = new ArrayList<>();
 
         for ( final OrderItem item : this ) {
