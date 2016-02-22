@@ -1,6 +1,6 @@
 package models;
 
-public class OrderItem {
+class OrderItem {
     public final Product product;
     public final int amount;
 

@@ -24,19 +24,6 @@ public class Warehouse implements Location {
         products.merge(product, amount, (o, v) -> o + v);
     }
 
-    public boolean hasAllProducts(Order order) {
-        for ( final OrderItem item : order ) {
-            final int stock = products.getOrDefault(item.product, 0);
-            final int demand = item.amount;
-
-            if ( demand > stock ) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     public Order takeStockedProducts(Order order) { // TODO find better name
         final Order remainingProducts = order.copyWithoutProducts();
         final Order takenProducts = order.copyWithoutProducts();
@@ -57,7 +44,7 @@ public class Warehouse implements Location {
         return remainingProducts;
     }
 
-    public void addOrder(Order order) {
+    private void addOrder(Order order) {
         orders.offer(order);
         for ( final OrderItem item : order ) {
             final int demand = item.amount;

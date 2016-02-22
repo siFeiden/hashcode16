@@ -18,7 +18,7 @@ public class Order implements Location, Iterable<OrderItem> {
         this.products = new HashMap<>();
     }
 
-    protected Order copyWithoutProducts() {
+    Order copyWithoutProducts() {
         return new Order(row, col, id);
     }
 

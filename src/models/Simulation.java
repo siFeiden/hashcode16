@@ -38,10 +38,6 @@ public class Simulation {
             partialOrders.addAll(order.splitForMaxTotalWeight(maxLoad));
         }
 
-        final IntSummaryStatistics collect = partialOrders.stream()
-                .collect(Collectors.summarizingInt(Order::size));
-        System.out.println(collect);
-
         final Warehouse[] sortedWareHouses = Arrays.copyOf(this.warehouses, warehouses.length);
 
         for ( Order order : partialOrders ) {
@@ -75,20 +71,20 @@ public class Simulation {
             final Drone idle = drones.poll();
 
             simulationTime = idle.getIdleTime();
-            final List<Command> actionCmds;
+            final List<Command> actionCommands;
 
             if ( idle.hasOrder() ) { // drone has an order and should fly to the order's destination
-                actionCmds = idle.deliver();
+                actionCommands = idle.deliver();
             } else { // drone is at a delivery destination, find next warehouse and load products
                 final Optional<Warehouse> warehouse = findNearestWarehouseWithOrder(idle);
                 if ( warehouse.isPresent() ) {
-                    actionCmds = idle.flyToWarehouse(warehouse.get());
+                    actionCommands = idle.flyToWarehouse(warehouse.get());
                 } else { // no more orders to be processed, stop simulating
                     break;
                 }
             }
 
-            commands.addAll(actionCmds);
+            commands.addAll(actionCommands);
             drones.add(idle);
         }
 
